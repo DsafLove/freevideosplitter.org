@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
 
 const videoFile = ref(null)
@@ -187,6 +187,32 @@ const refreshPage = () => {
   window.location.href = window.location.href
 }
 
+const moveTime = (delta) => {
+  if (!videoRef.value) return
+  let newTime = videoRef.value.currentTime + delta
+  newTime = Math.max(0, Math.min(videoDuration.value, newTime))
+  videoRef.value.currentTime = newTime
+  currentTime.value = newTime
+}
+
+const handleKeydown = (event) => {
+  if (!videoUrl.value) return
+  const tag = event.target.tagName.toLowerCase()
+  if (tag === 'input' || tag === 'textarea') return
+
+  const step = event.shiftKey ? 5 : 1
+  if (event.key === 'ArrowLeft') {
+    moveTime(-step)
+    event.preventDefault()
+  } else if (event.key === 'ArrowRight') {
+    moveTime(step)
+    event.preventDefault()
+  } else if (event.key === 'f' || event.key === 'F') {
+    addSplitPoint()
+    event.preventDefault()
+  }
+}
+
 const autoTrim = () => {
   if (!videoFile.value || !videoDuration.value) return
 
@@ -363,6 +389,14 @@ const downloadClip = (clip) => {
 
 videoRef.value?.addEventListener('play', handleVideoPlay)
 videoRef.value?.addEventListener('pause', handleVideoPause)
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <template>
