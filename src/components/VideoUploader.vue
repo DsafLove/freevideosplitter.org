@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
 
 const videoFile = ref(null)
@@ -360,6 +360,36 @@ const downloadClip = (clip) => {
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
 }
+
+const handleKeyDown = (event) => {
+  if (!videoRef.value) return
+  if (['INPUT', 'TEXTAREA'].includes(event.target.tagName)) return
+
+  if (event.key === 'ArrowLeft') {
+    event.preventDefault()
+    const step = event.shiftKey ? 5 : 1
+    const newTime = Math.max(0, videoRef.value.currentTime - step)
+    videoRef.value.currentTime = newTime
+    currentTime.value = newTime
+  } else if (event.key === 'ArrowRight') {
+    event.preventDefault()
+    const step = event.shiftKey ? 5 : 1
+    const newTime = Math.min(videoDuration.value, videoRef.value.currentTime + step)
+    videoRef.value.currentTime = newTime
+    currentTime.value = newTime
+  } else if (event.key.toLowerCase() === 'f') {
+    event.preventDefault()
+    addSplitPoint()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyDown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
+})
 
 videoRef.value?.addEventListener('play', handleVideoPlay)
 videoRef.value?.addEventListener('pause', handleVideoPause)
