@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --sourcemap inline --minify false --manifest manifest.json --ssrManifest manifest_ssr.json --configLoader bundle --emptyOutDir --logLevel info",
     "preview": "vite preview",
     "lint": "eslint . --fix",
     "format": "prettier --write src/"

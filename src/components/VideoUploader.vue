@@ -23,7 +23,7 @@ onMounted(async () => {
   try {
     isFFmpegLoading.value = true
     ffmpeg.value = createFFmpeg({
-      corePath: '/ffmpeg/ffmpeg-core.js',
+      corePath: './ffmpeg/ffmpeg-core.js',
       log: true
     })
     await ffmpeg.value.load()
@@ -209,6 +209,9 @@ const handleKeydown = (event) => {
     event.preventDefault()
   } else if (event.key === 'f' || event.key === 'F') {
     addSplitPoint()
+    event.preventDefault()
+  } else if (event.key === ' ' || event.key === 'Space') {
+    togglePlay()
     event.preventDefault()
   }
 }
@@ -401,7 +404,7 @@ onUnmounted(() => {
 
 <template>
   <div class="video-splitter-container">
-    <h1 class="app-title">FreeVideoSplitter.org</h1>
+    <h1 class="app-title">Dsaf Video Splitter</h1>
     <p class="app-subtitle">Split Video 100% In Your Device (No uploads). No Ads. 100% Free.</p>
     <div class="video-uploader">
       <div class="upload-section" v-if="!videoUrl">
@@ -598,25 +601,25 @@ onUnmounted(() => {
 .video-uploader {
   width: 100%;
   max-width: 1200px;
-  background: white;
+  background: rgb(255 255 255 / 15%);
   border-radius: 16px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   overflow: hidden;
 }
 
 .upload-section {
-  border: 2px dashed #e2e8f0;
+  border: 2px dashed rgb(226 232 240 / 25%);
   border-radius: 12px;
   padding: 3rem;
   text-align: center;
   margin: 2rem;
-  background: #f8fafc;
+  background: rgb(248 250 252 / 20%);
   transition: all 0.3s ease;
 }
 
 .upload-section:hover {
-  border-color: var(--primary-color);
-  background: #f0f7ff;
+  border-color: rgb(226 232 240 / 35%);
+  background: rgb(240 247 255 / 35%);
 }
 
 .file-input {
@@ -624,7 +627,7 @@ onUnmounted(() => {
 }
 
 .upload-label {
-  background-color: var(--primary-color);
+  background-color: rgb(59 130 246 / 35%);
   color: white;
   padding: 1rem 2rem;
   border-radius: 8px;
@@ -643,7 +646,7 @@ onUnmounted(() => {
 }
 
 .upload-label:hover {
-  background-color: #2563eb;
+  background-color: rgb(37 99 235 / 45%);
   transform: translateY(-1px);
 }
 

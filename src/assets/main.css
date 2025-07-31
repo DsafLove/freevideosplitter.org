@@ -1,5 +1,12 @@
 @import './base.css';
 
+body {
+  background-image: linear-gradient(rgba(255,255,255,0.175), rgba(255,255,255,0.175)), url('./background.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+
+}
+
 #app {
   max-width: 1280px;
   margin: 0 auto;
