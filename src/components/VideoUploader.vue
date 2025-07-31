@@ -222,9 +222,9 @@ const handleKeydown = (/** @type {KeyboardEvent} */ event) => {
     if (tag === 'input' || tag === 'textarea') return
 
     let step = 1;
-    if (event.shiftKey) {
+    if (event.ctrlKey) {
         step = 5;
-    } else if (event.ctrlKey) {
+    } else if (event.shiftKey) {
         step = 0.5;
     } else if (event.altKey) {
         step = 0.1;
