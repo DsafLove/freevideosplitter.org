@@ -38,12 +38,23 @@ function randomBetween(min, max) {
     return min + Math.random() * (max - min)
 }
 
-export function useEasterEgg(enable) {
+export function useEasterEgg(value = false) {
     const stickers = ref([])
     let animationId = null
 
+    let enable = value
+    window.addEventListener('keydown', (/** @type {KeyboardEvent} */ event) => {
+        const tag = event.target.tagName.toLowerCase();
+        if (tag === 'input' || tag === 'textarea') return
+
+        if (event.key === 'y') {
+            enable = !enable
+            event.preventDefault();
+        }
+    })
+
     function spawnSticker() {
-        if (!enable.value) return
+        if (!enable) return
 
         const sticker = stickerData[Math.floor(Math.random() * stickerData.length)]
         const size = Math.round(STICKER_SIZE * sticker.scale)
