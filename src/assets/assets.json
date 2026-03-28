@@ -46,21 +46,21 @@
     "sounds": [
         {
             "name": "Sound Effect 1",
-            "url": "./sounds/sound_effect_01.mp3",
+            "url": "./sounds/sound_effect_01.wav",
             "volume": 1.0,
             "loop": false,
             "playbackRate": 1.0
         },
         {
             "name": "Sound Effect 2",
-            "url": "./sounds/sound_effect_02.mp3",
+            "url": "./sounds/sound_effect_02.wav",
             "volume": 1.0,
             "loop": false,
             "playbackRate": 1.0
         },
         {
             "name": "Sound Effect 3",
-            "url": "./sounds/sound_effect_03.mp3",
+            "url": "./sounds/sound_effect_03.wav",
             "volume": 1.0,
             "loop": false,
             "playbackRate": 1.0

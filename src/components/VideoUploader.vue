@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
+import { useEasterEgg } from '../composables/useEasterEgg'
+
+const { stickers, spawnSticker } = useEasterEgg()
 
 const videoFile = ref(null)
 const videoUrl = ref('')
@@ -160,6 +163,7 @@ const togglePlay = () => {
             videoRef.value.play()
         }
         isPlaying.value = !isPlaying.value
+        spawnSticker()
     }
 }
 
@@ -213,6 +217,7 @@ const moveTime = (delta) => {
     newTime = Math.max(0, Math.min(videoDuration.value, newTime))
     videoRef.value.currentTime = newTime
     currentTime.value = newTime
+    spawnSticker()
 }
 
 const moveVolume = (delta) => {
@@ -221,6 +226,7 @@ const moveVolume = (delta) => {
     newVolume = Math.max(0, Math.min(1, newVolume))
     videoRef.value.volume = newVolume
     syncPlaybackIndicators()
+    spawnSticker()
 }
 
 const movePlaybackRate = (delta) => {
@@ -229,18 +235,21 @@ const movePlaybackRate = (delta) => {
     newRate = Math.max(0.25, Math.min(4, newRate)) // Limit between 0.25x and 4x
     videoRef.value.playbackRate = newRate
     syncPlaybackIndicators()
+    spawnSticker()
 }
 
 const resetPlaybackRate = () => {
     if (!videoRef.value) return
     videoRef.value.playbackRate = 1
     syncPlaybackIndicators()
+    spawnSticker()
 }
 
 const toggleMute = () => {
     if (!videoRef.value) return
     videoRef.value.muted = !videoRef.value.muted
     syncPlaybackIndicators()
+    spawnSticker()
 }
 
 const toggleFullScreen = () => {
@@ -719,6 +728,11 @@ onUnmounted(() => {
             target="_blank">Get
             access to 100% Free Source code here</a>
     </footer>
+    <!-- Easter egg: floating stickers -->
+    <div class="sticker-overlay">
+        <img v-for="s in stickers" :key="s.id" :src="s.url" class="floating-sticker"
+            :style="{ transform: `translate(${s.x}px, ${s.y}px)`, width: s.size + 'px', height: s.size + 'px' }" />
+    </div>
 </template>
 
 <style scoped>
@@ -1789,5 +1803,23 @@ tr:hover td {
         transform: scale(1);
         opacity: 1;
     }
+}
+
+.sticker-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+}
+
+.floating-sticker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    will-change: transform;
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
 }
 </style>
