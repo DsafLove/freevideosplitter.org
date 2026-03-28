@@ -38,11 +38,13 @@ function randomBetween(min, max) {
     return min + Math.random() * (max - min)
 }
 
-export function useEasterEgg() {
+export function useEasterEgg(enable) {
     const stickers = ref([])
     let animationId = null
 
     function spawnSticker() {
+        if (!enable.value) return
+
         const sticker = stickerData[Math.floor(Math.random() * stickerData.length)]
         const size = Math.round(STICKER_SIZE * sticker.scale)
         const angle = Math.random() * Math.PI * 2

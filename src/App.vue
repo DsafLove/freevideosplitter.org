@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, watchEffect } from 'vue'
 import VideoUploader from './components/VideoUploader.vue'
 import assets from './assets/assets.json'
 
@@ -26,10 +26,16 @@ const backgroundStyle = computed(() => {
     backgroundRepeat: bg.repeat,
   }
 })
+
+watchEffect(() => {
+  const s = backgroundStyle.value
+  const body = document.body
+  Object.assign(body.style, s)
+})
 </script>
 
 <template>
-  <main :style="backgroundStyle">
+  <main>
     <VideoUploader class="full-width" />
   </main>
 </template>
