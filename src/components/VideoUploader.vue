@@ -7,6 +7,10 @@ const videoUrl = ref('')
 const videoDuration = ref(0)
 const currentTime = ref(0)
 const videoRef = ref(null)
+const currentPlaybackRate = ref(1)
+const currentVolume = ref(100)
+const isMuted = ref(false)
+const currentStep = ref(1)
 const thumbnails = ref([])
 const isPlaying = ref(false)
 const isDragging = ref(false)
@@ -96,6 +100,7 @@ const generateThumbnails = async () => {
 
 const handleVideoMetadata = () => {
     videoDuration.value = videoRef.value.duration
+    syncPlaybackIndicators()
     generateThumbnails()
 }
 
@@ -166,6 +171,21 @@ const handleVideoPause = () => {
     isPlaying.value = false
 }
 
+const syncPlaybackIndicators = () => {
+    if (!videoRef.value) return
+    currentPlaybackRate.value = videoRef.value.playbackRate
+    isMuted.value = videoRef.value.muted
+    currentVolume.value = Math.round(videoRef.value.volume * 100)
+}
+
+const playbackRateDisplay = computed(() => {
+    return `${parseFloat(currentPlaybackRate.value.toFixed(2))}x`
+})
+
+const volumeDisplay = computed(() => {
+    return isMuted.value ? 'Muted' : `${currentVolume.value}%`
+})
+
 const addSplitPoint = () => {
     // Don't add duplicate split points
     if (!splitPoints.value.includes(currentTime.value)) {
@@ -200,11 +220,27 @@ const moveVolume = (delta) => {
     let newVolume = videoRef.value.volume + delta
     newVolume = Math.max(0, Math.min(1, newVolume))
     videoRef.value.volume = newVolume
+    syncPlaybackIndicators()
+}
+
+const movePlaybackRate = (delta) => {
+    if (!videoRef.value) return
+    let newRate = videoRef.value.playbackRate + delta
+    newRate = Math.max(0.25, Math.min(4, newRate)) // Limit between 0.25x and 4x
+    videoRef.value.playbackRate = newRate
+    syncPlaybackIndicators()
+}
+
+const resetPlaybackRate = () => {
+    if (!videoRef.value) return
+    videoRef.value.playbackRate = 1
+    syncPlaybackIndicators()
 }
 
 const toggleMute = () => {
     if (!videoRef.value) return
     videoRef.value.muted = !videoRef.value.muted
+    syncPlaybackIndicators()
 }
 
 const toggleFullScreen = () => {
@@ -216,19 +252,41 @@ const toggleFullScreen = () => {
     }
 }
 
+const getStepFromModifiers = (ctrlKey, shiftKey, altKey) => {
+    if (ctrlKey) return 5
+    if (shiftKey) return 0.5
+    if (altKey) return 0.1
+    return 1
+}
+
+const syncCurrentStepFromEvent = (/** @type {KeyboardEvent} */ event) => {
+    currentStep.value = getStepFromModifiers(event.ctrlKey, event.shiftKey, event.altKey)
+}
+
+const playheadStepClass = computed(() => {
+    if (currentStep.value === 5) return 'playhead-step-fast'
+    if (currentStep.value === 0.5) return 'playhead-step-half'
+    if (currentStep.value === 0.1) return 'playhead-step-fine'
+    return 'playhead-step-default'
+})
+
+const resetCurrentStep = () => {
+    currentStep.value = 1
+}
+
+const handleVisibilityChange = () => {
+    if (document.hidden) {
+        resetCurrentStep()
+    }
+}
+
 const handleKeydown = (/** @type {KeyboardEvent} */ event) => {
+    syncCurrentStepFromEvent(event)
     if (!videoUrl.value) return
     const tag = event.target.tagName.toLowerCase()
     if (tag === 'input' || tag === 'textarea') return
 
-    let step = 1;
-    if (event.ctrlKey) {
-        step = 5;
-    } else if (event.shiftKey) {
-        step = 0.5;
-    } else if (event.altKey) {
-        step = 0.1;
-    }
+    const step = currentStep.value
 
     if (event.key === 'ArrowLeft') {
         moveTime(-step)
@@ -237,11 +295,26 @@ const handleKeydown = (/** @type {KeyboardEvent} */ event) => {
         moveTime(step)
         event.preventDefault()
     } else if (event.key === 'ArrowUp') {
-        moveVolume(0.1)
+        if (event.shiftKey) {
+            movePlaybackRate(0.25);
+        } else if (event.altKey) {
+            movePlaybackRate(0.1);
+        } else {
+            moveVolume(0.1);
+        }
         event.preventDefault()
     } else if (event.key === 'ArrowDown') {
-        moveVolume(-0.1)
+        if (event.shiftKey) {
+            movePlaybackRate(-0.25);
+        } else if (event.altKey) {
+            movePlaybackRate(-0.1);
+        } else {
+            moveVolume(-0.1);
+        }
         event.preventDefault()
+    } else if (event.key === 'r') {
+        resetPlaybackRate();
+        event.preventDefault();
     } else if (event.key === 'm') {
         toggleMute()
         event.preventDefault()
@@ -255,6 +328,10 @@ const handleKeydown = (/** @type {KeyboardEvent} */ event) => {
         togglePlay()
         event.preventDefault()
     }
+}
+
+const handleKeyup = (/** @type {KeyboardEvent} */ event) => {
+    syncCurrentStepFromEvent(event)
 }
 
 const autoTrim = () => {
@@ -436,10 +513,16 @@ videoRef.value?.addEventListener('pause', handleVideoPause)
 
 onMounted(() => {
     window.addEventListener('keydown', handleKeydown)
+    window.addEventListener('keyup', handleKeyup)
+    window.addEventListener('blur', resetCurrentStep)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
 onUnmounted(() => {
     window.removeEventListener('keydown', handleKeydown)
+    window.removeEventListener('keyup', handleKeyup)
+    window.removeEventListener('blur', resetCurrentStep)
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 </script>
 
@@ -464,7 +547,12 @@ onUnmounted(() => {
             <div v-if="videoUrl" class="video-container">
                 <div class="video-player">
                     <video ref="videoRef" :src="videoUrl" class="video-element" @loadedmetadata="handleVideoMetadata"
-                        @timeupdate="handleTimeUpdate"></video>
+                        @timeupdate="handleTimeUpdate" @volumechange="syncPlaybackIndicators"
+                        @ratechange="syncPlaybackIndicators"></video>
+                </div>
+                <div class="playback-indicators">
+                    <span class="indicator-pill">Speed: {{ playbackRateDisplay }}</span>
+                    <span class="indicator-pill">Volume: {{ volumeDisplay }}</span>
                 </div>
             </div>
         </div>
@@ -489,7 +577,7 @@ onUnmounted(() => {
                 <div v-for="(time, index) in splitPoints" :key="'split-' + index" class="split-point"
                     :style="{ left: ((time / videoDuration) * 100) + '%' }" @click.stop="removeSplitPoint(time)"></div>
                 <!-- Playhead and scissors -->
-                <div class="playhead" :style="{ left: timelineProgress + '%' }">
+                <div class="playhead" :class="playheadStepClass" :style="{ left: timelineProgress + '%' }">
                     <button class="scissors-button" @click.stop="addSplitPoint">
                         <svg class="scissors-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2">
@@ -712,6 +800,24 @@ onUnmounted(() => {
     overflow: hidden;
 }
 
+.playback-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.indicator-pill {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    border-radius: 9999px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
 .video-element {
     max-height: 40vh;
     width: auto;
@@ -808,6 +914,27 @@ onUnmounted(() => {
     box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
     pointer-events: none;
     z-index: 10;
+    transition: left 0.1s linear, background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.playhead.playhead-step-default {
+    background: var(--primary-color);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+.playhead.playhead-step-fast {
+    background: #f59e0b;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.55);
+}
+
+.playhead.playhead-step-half {
+    background: #22c55e;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+}
+
+.playhead.playhead-step-fine {
+    background: #a855f7;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
 }
 
 .scissors-button {
@@ -1281,6 +1408,16 @@ tr:hover td {
 
     .video-container {
         padding: 0.5rem;
+    }
+
+    .playback-indicators {
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .indicator-pill {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.65rem;
     }
 
     .video-element {
