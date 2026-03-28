@@ -1,0 +1,96 @@
+{
+    "backgrounds": [
+        {
+            "name": "Background 1",
+            "url": "./backgrounds/background_01.png",
+            "gradient": {
+                "type": "linear",
+                "colors": [
+                    "rgba(255, 255, 255, 0.175)",
+                    "rgba(255, 255, 255, 0.175)"
+                ]
+            },
+            "size": "cover",
+            "position": "center, top",
+            "repeat": "no-repeat"
+        },
+        {
+            "name": "Background 2",
+            "url": "./backgrounds/background_02.png",
+            "gradient": {
+                "type": "linear",
+                "colors": [
+                    "rgba(255, 255, 255, 0.175)",
+                    "rgba(255, 255, 255, 0.175)"
+                ]
+            },
+            "size": "cover",
+            "position": "center, top",
+            "repeat": "no-repeat"
+        },
+        {
+            "name": "Background 3",
+            "url": "./backgrounds/background_03.gif",
+            "gradient": {
+                "type": "linear",
+                "colors": [
+                    "rgba(255, 255, 255, 0.175)",
+                    "rgba(255, 255, 255, 0.175)"
+                ]
+            },
+            "size": "cover",
+            "position": "center, top",
+            "repeat": "no-repeat"
+        }
+    ],
+    "sounds": [
+        {
+            "name": "Sound Effect 1",
+            "url": "./sounds/sound_effect_01.mp3",
+            "volume": 1.0,
+            "loop": false,
+            "playbackRate": 1.0
+        },
+        {
+            "name": "Sound Effect 2",
+            "url": "./sounds/sound_effect_02.mp3",
+            "volume": 1.0,
+            "loop": false,
+            "playbackRate": 1.0
+        },
+        {
+            "name": "Sound Effect 3",
+            "url": "./sounds/sound_effect_03.mp3",
+            "volume": 1.0,
+            "loop": false,
+            "playbackRate": 1.0
+        }
+    ],
+    "stickers": [
+        {
+            "name": "Sticker 1",
+            "url": "./stickers/sticker_01.png",
+            "scale": 0.5
+        },
+        {
+            "name": "Sticker 2",
+            "url": "./stickers/sticker_02.png",
+            "scale": 0.5
+        },
+        {
+            "name": "Sticker 3",
+            "url": "./stickers/sticker_03.png",
+            "scale": 0.5
+        },
+        {
+            "name": "Sticker 4",
+            "url": "./stickers/sticker_04.png",
+            "scale": 0.5
+        },
+        {
+            "name": "Sticker 5",
+            "url": "./stickers/sticker_05.png",
+            "scale": 0.5
+        }
+    ]
+}

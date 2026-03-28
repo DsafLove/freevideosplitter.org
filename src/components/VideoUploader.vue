@@ -259,6 +259,13 @@ const getStepFromModifiers = (ctrlKey, shiftKey, altKey) => {
     return 1
 }
 
+const getAdjustmentStepFromModifiers = (ctrlKey, shiftKey, altKey) => {
+    if (ctrlKey) return 0.25
+    if (shiftKey) return 0.1
+    if (altKey) return 0.05
+    return 0.1
+}
+
 const syncCurrentStepFromEvent = (/** @type {KeyboardEvent} */ event) => {
     currentStep.value = getStepFromModifiers(event.ctrlKey, event.shiftKey, event.altKey)
 }
@@ -295,22 +302,20 @@ const handleKeydown = (/** @type {KeyboardEvent} */ event) => {
         moveTime(step)
         event.preventDefault()
     } else if (event.key === 'ArrowUp') {
-        if (event.shiftKey) {
-            movePlaybackRate(0.25);
-        } else if (event.altKey) {
-            movePlaybackRate(0.1);
-        } else {
-            moveVolume(0.1);
-        }
+        const adjustmentStep = getAdjustmentStepFromModifiers(event.ctrlKey, event.shiftKey, event.altKey)
+        moveVolume(adjustmentStep)
         event.preventDefault()
     } else if (event.key === 'ArrowDown') {
-        if (event.shiftKey) {
-            movePlaybackRate(-0.25);
-        } else if (event.altKey) {
-            movePlaybackRate(-0.1);
-        } else {
-            moveVolume(-0.1);
-        }
+        const adjustmentStep = getAdjustmentStepFromModifiers(event.ctrlKey, event.shiftKey, event.altKey)
+        moveVolume(-adjustmentStep)
+        event.preventDefault()
+    } else if (event.key === 'PageUp') {
+        const adjustmentStep = getAdjustmentStepFromModifiers(event.ctrlKey, event.shiftKey, event.altKey)
+        movePlaybackRate(adjustmentStep)
+        event.preventDefault()
+    } else if (event.key === 'PageDown') {
+        const adjustmentStep = getAdjustmentStepFromModifiers(event.ctrlKey, event.shiftKey, event.altKey)
+        movePlaybackRate(-adjustmentStep)
         event.preventDefault()
     } else if (event.key === 'r') {
         resetPlaybackRate();
@@ -637,6 +642,11 @@ onUnmounted(() => {
                         <template v-else>Generate Clips</template>
                     </button>
                 </div>
+                <p class="keyboard-shortcuts-hint">
+                    Shortcuts: <strong>←/→</strong> seek, <strong>↑/↓</strong> volume,
+                    <strong>Page Up/Page Down</strong> speed,
+                    modifiers <strong>Ctrl / Shift / Alt</strong> adjust step size.
+                </p>
             </div>
 
             <!-- FFmpeg Status -->
@@ -1043,6 +1053,19 @@ onUnmounted(() => {
     flex-direction: column;
     gap: 1rem;
     margin: 1rem 0;
+}
+
+.keyboard-shortcuts-hint {
+    margin: 0;
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.keyboard-shortcuts-hint strong {
+    color: #334155;
+    font-weight: 600;
 }
 
 .controls-row {
@@ -1507,6 +1530,11 @@ tr:hover td {
     .generate-clips-button {
         padding: 0.5rem 1rem;
         font-size: 0.9rem;
+    }
+
+    .keyboard-shortcuts-hint {
+        font-size: 0.82rem;
+        padding: 0 0.25rem;
     }
 
     .play-icon {
